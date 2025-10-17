@@ -1,5 +1,27 @@
-*.pyc
+# Byte-compiled / optimized / DLL files
 __pycache__/
-db.sqlite3
-.idea/
+*.py[cod]
+
+# SQLite database files
 *.sqlite3
+db.sqlite3
+
+# PyCharm project files
+.idea/
+
+# VSCode settings (se usar VSCode)
+.vscode/
+
+# Environments
+.env
+.venv/
+env/
+venv/
+
+# Django stuff:
+*.log
+staticfiles/
+media/
+
+# Python cache files
+*.pyc
