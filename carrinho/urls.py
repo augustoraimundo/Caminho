@@ -1,11 +1,7 @@
 from django.urls import path
-from .views import CarrinhoViewSet
-
-carrinho_view = CarrinhoViewSet.as_view({
-    'get': 'list',
-    'post': 'add_item'
-})
+from .views import ItemCarrinhoListCreateView, ItemCarrinhoUpdateDeleteView
 
 urlpatterns = [
-    path('', carrinho_view, name='ver-carrinho'),
-    path('remover/<int:pk>/', CarrinhoViewSet.as_view({'delete': 'remove_item'}), name='remover-item'),]
+    path('', ItemCarrinhoListCreateView.as_view(), name='carrinho-itens-list-create'),
+    path('<int:item_id>/', ItemCarrinhoUpdateDeleteView.as_view(), name='carrinho-item-update-delete'),
+]

@@ -1,10 +1,13 @@
 from django.contrib import admin
 from .models import Carrinho, ItemCarrinho
 
-class ItemCarrinhoInline(admin.TabularInline):
-    model = ItemCarrinho
-    extra = 1
-
 @admin.register(Carrinho)
 class CarrinhoAdmin(admin.ModelAdmin):
-    inlines = [ItemCarrinhoInline]
+    list_display = ('id', 'usuario')
+    search_fields = ('usuario__username',)
+
+@admin.register(ItemCarrinho)
+class ItemCarrinhoAdmin(admin.ModelAdmin):
+    list_display = ('carrinho', 'produto', 'quantidade')
+    list_filter = ('produto',)
+    search_fields = ('produto__nome', 'carrinho__usuario__username')

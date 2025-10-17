@@ -1,30 +1,30 @@
-from django.shortcuts import render
-
-from rest_framework import viewsets, status
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import generics, permissions
 from .models import Carrinho, ItemCarrinho
-from .serializers import CarrinhoSerializer, ItemCarrinhoSerializer
-from django.shortcuts import get_object_or_404
+from .serializers import ItemCarrinhoSerializer
 
-class CarrinhoViewSet(viewsets.ViewSet):
-    permission_classes = [IsAuthenticated]
+class CarrinhoMixin:
+    def get_carrinho(self):
+        carrinho, created = Carrinho.objects.get_or_create(usuario=self.request.user)
+        return carrinho
 
-    def list(self, request):
-        carrinho, _ = Carrinho.objects.get_or_create(usuario=request.user)
-        serializer = CarrinhoSerializer(carrinho)
-        return Response(serializer.data)
+class ItemCarrinhoListCreateView(CarrinhoMixin, generics.ListCreateAPIView):
+    serializer_class = ItemCarrinhoSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
-    def add_item(self, request):
-        carrinho, _ = Carrinho.objects.get_or_create(usuario=request.user)
-        serializer = ItemCarrinhoSerializer(data=request.data)
-        if serializer.is_valid():
-            item = serializer.save(carrinho=carrinho)
-            return Response(ItemCarrinhoSerializer(item).data, status=201)
-        return Response(serializer.errors, status=400)
+    def get_queryset(self):
+        carrinho = self.get_carrinho()
+        return carrinho.itens.all()
 
-    def remove_item(self, request, pk=None):
-        carrinho, _ = Carrinho.objects.get_or_create(usuario=request.user)
-        item = get_object_or_404(ItemCarrinho, pk=pk, carrinho=carrinho)
-        item.delete()
-        return Response(status=204)
+    def perform_create(self, serializer):
+        carrinho = self.get_carrinho()
+        serializer.context['carrinho'] = carrinho
+        serializer.save()
+
+class ItemCarrinhoUpdateDeleteView(CarrinhoMixin, generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = ItemCarrinhoSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    lookup_url_kwarg = 'item_id'
+
+    def get_queryset(self):
+        carrinho = self.get_carrinho()
+        return carrinho.itens.all()

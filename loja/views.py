@@ -8,4 +8,4 @@ class ProdutoViewSet(viewsets.ModelViewSet):
 
 
 def home(request):
-    return HttpResponse("<h1>🚀 API Wabel está rodando!</h1>")
+    return HttpResponse("<h1>🚀 API Wabel está rodando normalmente!</h1>")

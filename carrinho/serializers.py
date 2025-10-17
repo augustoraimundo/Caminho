@@ -1,26 +1,32 @@
 from rest_framework import serializers
-from .models import Carrinho, ItemCarrinho
-from loja.models import Produto
-
-class ProdutoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Produto
-        fields = ['id', 'nome', 'preco']
+from .models import ItemCarrinho
+from loja.serializers import ProdutoSerializer
 
 class ItemCarrinhoSerializer(serializers.ModelSerializer):
     produto = ProdutoSerializer(read_only=True)
-    produto_id = serializers.PrimaryKeyRelatedField(
-        queryset=Produto.objects.all(), source='produto', write_only=True
-    )
+    produto_id = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = ItemCarrinho
         fields = ['id', 'produto', 'produto_id', 'quantidade']
 
-class CarrinhoSerializer(serializers.ModelSerializer):
-    itens = ItemCarrinhoSerializer(many=True)
+    def validate_produto_id(self, value):
+        from loja.models import Produto
+        if not Produto.objects.filter(id=value).exists():
+            raise serializers.ValidationError("Produto não existe.")
+        return value
 
-    class Meta:
-        model = Carrinho
-        fields = ['id', 'usuario', 'itens']
-        read_only_fields = ['usuario']
+    def create(self, validated_data):
+        carrinho = self.context['carrinho']
+        produto_id = validated_data['produto_id']
+        quantidade = validated_data.get('quantidade', 1)
+
+        item, created = ItemCarrinho.objects.get_or_create(
+            carrinho=carrinho,
+            produto_id=produto_id,
+            defaults={'quantidade': quantidade}
+        )
+        if not created:
+            item.quantidade += quantidade
+            item.save()
+        return item

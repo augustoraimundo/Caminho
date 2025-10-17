@@ -3,4 +3,8 @@ from .models import Produto
 
 @admin.register(Produto)
 class ProdutoAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'marca', 'categoria', 'preco', 'criado')
+    list_display = ('id', 'nome', 'preco', 'marca', 'categoria')
+    list_display_links = ('id', 'nome')
+    list_filter = ('marca', 'categoria')
+    search_fields = ('nome', 'descricao', 'marca', 'categoria')
+    ordering = ('nome',)
